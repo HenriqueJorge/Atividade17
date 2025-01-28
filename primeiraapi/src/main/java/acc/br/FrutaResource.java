@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import acc.br.model.Fruta;
+import acc.br.service.FrutaService;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -19,20 +21,23 @@ import jakarta.ws.rs.core.Response;
 @Path("/frutas")
 public class FrutaResource {
 	
+	@Inject
+	FrutaService frutaService;
+	
 	private static Logger log = LoggerFactory.getLogger(FrutaResource.class);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<Fruta> list() {
     	log.info("Listando todas as frutas");
-        return Fruta.listAll();
+        return frutaService.listarFrutas();
     }
     
     @POST
     @Transactional
     public Response novaFruta(Fruta fruta) {
     	log.info("Inserindo uma nova fruta");
-        fruta.persist();
+        frutaService.criarFruta(fruta);
         return Response.status(Response.Status.CREATED).entity(fruta).build();
     }
     
@@ -41,11 +46,7 @@ public class FrutaResource {
     @Transactional
     public Response deletar(@PathParam("id") Long id) {
     	log.info("Excluindo uma fruta");
-        Fruta fruta = Fruta.findById(id);
-        if (fruta == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        fruta.delete();
+    	frutaService.deletaFruta(id);
         return Response.noContent().build();
     }
 
